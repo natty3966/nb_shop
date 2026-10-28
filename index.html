@@ -51,7 +51,7 @@ header::after{content:"";position:absolute;inset:auto 0 0 0;height:3px;backgroun
 .price{transition:color .3s}
 .o button,.sz button{transition:transform .2s ease,border-color .25s ease,background .25s ease}
 .o button:hover,.sz button:hover{transform:translateY(-2px);border-color:var(--gold)}
-.md{animation:pop .45s cubic-bezier(.2,.7,.2,1) both}
+.md{animation:pop .45s cubic-bezier(.2,.7,.2,1) both}.md.still{animation:none}
 .ov{animation:fadeIn .3s ease both}@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 #cb{animation:pop .5s cubic-bezier(.2,.7,.2,1) both}
 .tag{animation:fadeIn 1s ease .4s both}
@@ -159,11 +159,11 @@ function card(p){const first=Math.max(0,p.variants.findIndex(v=>v.on)),any=p.var
  <div class="lbl">${esc(p.opt)}</div><div class="opts">${p.variants.map((x,i)=>`<div class="o ${x.on?'':'off'}"><button data-a="open" data-p="${p.id}" data-i="${i}"><img src="${x.img}" alt=""><span>${esc(x.n)}</span></button></div>`).join('')}</div>
  <button class="btn ${any?'':'dis'}" data-a="open" data-p="${p.id}" data-i="${first}" ${any?'':'disabled'}>${any?'Choose '+esc(p.opt.toLowerCase())+' &amp; size · ይምረጡ':'Not available · አልቋል'}</button></div></article>`}
 function modal(){const e=$('#m');if(!M){e.hidden=true;e.innerHTML='';return}
- const p=find(M.p),v=p.variants[M.i],n=p.variants.length;e.hidden=false;
- e.innerHTML=`<div class="md"><button class="x" data-a="close" aria-label="Close">✕</button><img src="${v.img}" alt="${esc(p.name+' '+v.n)}">${n>1?'<button class="nv l" data-a="nav" data-d="-1" aria-label="Previous">‹</button><button class="nv r" data-a="nav" data-d="1" aria-label="Next">›</button>':''}
+ const p=find(M.p),v=p.variants[M.i],n=p.variants.length,was=!e.hidden,st=was&&e.firstElementChild?e.firstElementChild.scrollTop:0;e.hidden=false;
+ e.innerHTML=`<div class="md${was?' still':''}"><button class="x" data-a="close" aria-label="Close">✕</button><img decoding="sync" src="${v.img}" alt="${esc(p.name+' '+v.n)}">${n>1?'<button class="nv l" data-a="nav" data-d="-1" aria-label="Previous">‹</button><button class="nv r" data-a="nav" data-d="1" aria-label="Next">›</button>':''}
  <div class="mb"><h3>${esc(p.name)} — ${esc(v.n)}</h3><div class="price">${M.sizes.length?fmt(M.sizes.reduce((a,z)=>a+unit(p,z),0))+' <small>birr total</small>':(p.sizePrices?'<small>from</small> '+fmt(Math.min(...Object.values(p.sizePrices))):fmt(p.price))+' <small>birr</small>'}</div><span class="tag ${v.on?'':'out'}" style="position:static;display:inline-block;margin-top:6px">${v.on?'Available · አለ':'Not available · አልቋል'}</span>
  ${p.sizes.length?`<div class="lbl">${esc(p.sizeLabel)} — pick one or more · አንድ ወይም ከዚያ በላይ</div><div class="sz">${p.sizes.map(z=>`<button data-a="mz" data-z="${esc(z)}" class="${M.sizes.includes(z)?'sel':''}">${esc(z)}${p.sizePrices?'<br><small>'+fmt(unit(p,z))+' birr</small>':''}</button>`).join('')}</div>`:''}
- <button class="btn" data-a="add" ${v.on?'':'disabled'}>${v.on?'Add to order · ወደ ትዕዛዝ ጨምር':'Not available · አልቋል'}</button></div></div>`}
+ <button class="btn" data-a="add" ${v.on?'':'disabled'}>${v.on?'Add to order · ወደ ትዕዛዝ ጨምር':'Not available · አልቋል'}</button></div></div>`;if(was&&st)e.firstElementChild.scrollTop=st}
 function cartUI(){const c=$('#cb'),n=count();c.hidden=!n;c.innerHTML=n?`<div><b>${fmt(total())} birr</b><div class="note" style="margin:0">${n} item${n>1?'s':''} · ${n} ዕቃ</div></div><button class="btn" data-a="cart">View order &amp; call · ትዕዛዝ ይመልከቱ</button>`:'';sheet()}
 function summary(){return S.shop.name+'\n'+lines().map(l=>{const p=find(l.p);return `• ${p.name} (${p.variants[l.i].n})${l.z?' '+l.z:''} ×${l.q} = ${fmt(unit(p,l.z)*l.q)} birr`}).join('\n')+'\nTotal: '+fmt(total())+' birr'}
 function smsHref(){const ios=/iP(hone|ad|od)/.test(navigator.userAgent);return 'sms:'+phones().join(',')+(ios?'&':'?')+'body='+encodeURIComponent(summary())}
